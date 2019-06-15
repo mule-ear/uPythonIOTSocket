@@ -12,6 +12,7 @@ led = Pin(2, Pin.OUT)
 HOST = ''
 PORT = 5020
 CLIENTS = 1
+DEVICE = "Wemos D1 Mini"
 
 def create_socket( addr, port_num, clients):
     sock = socket.socket()
@@ -23,23 +24,30 @@ def create_socket( addr, port_num, clients):
 def socket_server(sock):
     try:
         print("Waiting for a connection...")
-        conn, address = sock.accept()  # accept new connection
-        print("Connection from: " + str(address))
+        conn, addr = sock.accept()  
+        print("Connection from: " + str(addr[0]))
         while True:
-            data = conn.recv(1024).decode()
-            if not data:
-                # if data is not received break
+            incoming_data = conn.recv(1024).decode()
+            if not incoming_data:
                 break
-            print("from connected user: " + str(data))
-            from_client = str(data)
+            print("Recieved from " + str(addr[0])+ ": " + str(incoming_data))
+            # print(type(incoming_data))
+            # 6on was just an arbitrary message
+            from_client = str(incoming_data)
             if from_client == '6on':
                 led(0)
+                reply = "Relay On"
             elif from_client == '6off':
                 led(1)
+                reply = "Relay Off"
+            elif from_client == "info":
+                reply = DEVICE
+            else:
+                reply = "NoOp"
 
-            conn.send(data.encode())  # send data back
+            conn.send(reply.encode()) 
     finally:
-        conn.close()  # close the connection
+        conn.close() 
 
 SOCK = create_socket(HOST, PORT, CLIENTS)
 while True:
