@@ -1,18 +1,33 @@
 #! /usr/bin/env python3
 import network
 import socket
+import time
 from machine import Pin
+from machine import ADC
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.ifconfig()
 print()
 
-led = Pin(2, Pin.OUT)
 HOST = ''
 PORT = 5020
 CLIENTS = 1
 DEVICE = "Wemos D1 Mini"
+
+led = Pin(2, Pin.OUT)
+adc = ADC(0)
+
+def get_voltage(adc_obj, sample, dly):
+    l = []
+    for i in range(sample):
+        l.append(adc_obj.read())
+        time.sleep(dly)
+    l.remove(max(l))
+    l.remove(min(l))
+    voltage = (sum(l)/len(l)) * .022
+    return voltage
+
 
 def create_socket( addr, port_num, clients):
     sock = socket.socket()
@@ -42,6 +57,8 @@ def socket_server(sock):
                 reply = "Relay Off"
             elif from_client == "info":
                 reply = DEVICE
+            elif from_client == "voltage":
+                reply = str(get_voltage(adc, 12, 5))
             else:
                 reply = "NoOp"
 
