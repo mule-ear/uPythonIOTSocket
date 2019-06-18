@@ -1,5 +1,5 @@
 # uPythonIOTSocket
-Develop a strong MicroPython Client/Server using sockets
+Develop a strong MicroPython Client/Server using sockets. Meant to be the template for easy IOT development.
 
 This initial commit has a working server and a client. 
 
